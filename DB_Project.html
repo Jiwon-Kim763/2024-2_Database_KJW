@@ -2,44 +2,65 @@
 <html lang="ko">
     <head>
         <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>인천시 보건/체육 서비스 검색</title>
-</head>
-<body>
-    <h1>인천시 보건/체육 서비스 검색</h1>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>인천시 보건/체육 서비스 검색</title>
+    </head>
+    <body>
+        <h1>인천시 보건/체육 서비스 검색</h1>
 
-    <form id="search-form">
-        <label for="region">지역 선택:</label>
-        <select id="region" name="region">
-            <option value="전체">전체</option>
-            <option value="미추홀구">미추홀구</option>
-            <option value="연수구">연수구</option>
-            <option value="남동구">남동구</option>
-            <option value="부평구">부평구</option>
-            <option value="계양구">계양구</option>
-            <option value="서구">서구</option>
-        </select>
+        <form id="search-form" onsubmit="search(event)">
+            <label for="region">지역 선택:</label>
+            <select id="region" name="region">
+                <option value="전체">전체</option>
+                <option value="미추홀구">미추홀구</option>
+                <option value="연수구">연수구</option>
+                <option value="남동구">남동구</option>
+                <option value="부평구">부평구</option>
+                <option value="계양구">계양구</option>
+                <option value="서구">서구</option>
+            </select>
 
-        <label for="facility-type">시설 종류:</label>
-        <select id="facility-type" name="facility-type">
-            <option value="전체">전체</option>
-            <option value="약국">약국</option>
-            <option value="의원">의원</option>
-            <option value="장애인 복지시설">장애인 복지시설</option>
-            <option value="공원 체육시설">공원 체육시설</option>
-            <option value="경기장">경기장</option>
-        </select>
+            <label for="facility-type">시설 종류:</label>
+            <select id="facility-type" name="facility-type">
+                <option value="clinics">의원</option>
+                <option value="pharmacies">약국</option>
+                <option value="disability">장애인 복지시설</option>
+                <option value="sports_facilities">공원 체육시설</option>
+                <option value="stadiums">경기장</option>
+                <option value="foreigner_hospitals">외국인 진료 병원</option>
+                <option value="night_pharmacies">공공 심야 약국</option>
+            </select>
 
-        <label for="visit-time">방문 시간:</label>
-        <input type="time" id="visit-time" name="visit-time">
+            <button type="submit">검색</button>
+        </form>
 
-        <button type="submit">검색</button>
-    </form>
+        <h2>검색 결과</h2>
+        <div id="result-container">
+            <p>검색 결과가 여기에 표시됩니다.</p>
+        </div>
 
-    <h2>검색 결과</h2>
-    <div id="result-container">
-        <p>검색 결과가 여기에 표시됩니다.</p>
-    </div>
-    
-</body>
+        <script>
+            async function search(event) {
+                event.preventDefault(); // 폼 제출 방지
+                const region = document.getElementById('region').value;
+                const facilityType = document.getElementById('facility-type').value;
+                const response = await fetch(`/search?region=${region}&facility=${facilityType}`);
+                const data = await response.json();
+                
+                const resultContainer = document.getElementById('result-container');
+                resultContainer.innerHTML = ''; // 기존 결과 초기화
+
+                if (data.length === 0) {
+                    resultContainer.innerHTML = '<p>검색 결과가 없습니다.</p>';
+                    return;
+                }
+
+                data.forEach(row => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.innerText = JSON.stringify(row, null, 2); // JSON 데이터를 보기 쉽게 출력
+                    resultContainer.appendChild(rowDiv);
+                });
+            }
+        </script>
+    </body>
 </html>
