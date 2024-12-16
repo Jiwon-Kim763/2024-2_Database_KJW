@@ -3,11 +3,12 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>인천시 보건/체육 서비스 검색</title>
+        <title>시설 검색</title>
     </head>
     <body>
-        <h1>인천시 보건/체육 서비스 검색</h1>
+        <h1>인천시 시설 검색</h1>
 
+        <!-- 검색 폼 -->
         <form id="search-form" onsubmit="search(event)">
             <label for="region">지역 선택:</label>
             <select id="region" name="region">
@@ -42,24 +43,33 @@
         <script>
             async function search(event) {
                 event.preventDefault(); // 폼 제출 방지
+
                 const region = document.getElementById('region').value;
                 const facilityType = document.getElementById('facility-type').value;
-                const response = await fetch(`/search?region=${region}&facility=${facilityType}`);
-                const data = await response.json();
-                
-                const resultContainer = document.getElementById('result-container');
-                resultContainer.innerHTML = ''; // 기존 결과 초기화
 
-                if (data.length === 0) {
-                    resultContainer.innerHTML = '<p>검색 결과가 없습니다.</p>';
-                    return;
+                try {
+                    // Node.js 서버로 요청 보내기
+                    const response = await fetch(`http://localhost:3000/search?region=${region}&facility=${facilityType}`);
+                    const data = await response.json();
+
+                    const resultContainer = document.getElementById('result-container');
+                    resultContainer.innerHTML = ''; // 기존 결과 초기화
+
+                    if (data.length === 0) {
+                        resultContainer.innerHTML = '<p>검색 결과가 없습니다.</p>';
+                        return;
+                    }
+
+                    // 결과 출력
+                    data.forEach(row => {
+                        const rowDiv = document.createElement('div');
+                        rowDiv.innerText = JSON.stringify(row, null, 2);
+                        resultContainer.appendChild(rowDiv);
+                    });
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('result-container').innerHTML = '<p>서버 오류가 발생했습니다.</p>';
                 }
-
-                data.forEach(row => {
-                    const rowDiv = document.createElement('div');
-                    rowDiv.innerText = JSON.stringify(row, null, 2); // JSON 데이터를 보기 쉽게 출력
-                    resultContainer.appendChild(rowDiv);
-                });
             }
         </script>
     </body>
